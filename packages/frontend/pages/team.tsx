@@ -438,7 +438,7 @@ function ProjectMultiSelect({ value, setValue, disabled }) {
   )
 }
 
-function InviteMemberCard() {
+function InviteMemberCard({ showPendingInvitations }) {
   const [role, setRole] = useState("member")
   const { projects } = useProjects()
   const [selectedProjects, setSelectedProjects] = useState([])
@@ -473,35 +473,27 @@ function InviteMemberCard() {
   async function invite({ email }) {
     const seatAllowance = org?.seatAllowance || SEAT_ALLOWANCE[org?.plan]
     if (org?.users?.length >= seatAllowance) {
-      return openUpgrade("team")
+      // return openUpgrade("team")
     }
 
     try {
       setIsLoading(true)
-      const { user: newUser } = await addUserToOrg({
+      await addUserToOrg({
         email,
         role,
         projects: selectedProjects,
       })
 
-      if (!config.IS_SELF_HOSTED) {
-        notifications.show({
-          title: "Member invited",
-          message: "An email has been sent to them",
-          icon: <IconCheck />,
-          color: "green",
-        })
+      notifications.show({
+        title: "Member invited",
+        message: "An email has been sent to them",
+        icon: <IconCheck />,
+        color: "green"
+      })
 
-        mutate()
-
-        return
-      } else {
-        const link = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/join?token=${newUser.singleUseToken}`
-        setIsLoading(false)
-        setInviteLink(link)
-        setOpened(true)
-        return
-      }
+      mutate()
+      form.reset()
+      showPendingInvitations()
     } catch (error) {
       console.error(error)
     } finally {
@@ -622,7 +614,7 @@ function MemberList({ users, isInvitation }) {
   const { user: currentUser } = useUser()
   const { projects } = useProjects()
   const { org } = useOrg()
-  const [opened, { close, open }] = useDisclosure(false)
+  const [opened] = useDisclosure(false)
 
   const [searchValue, setSearchValue] = useState("")
   const [role, setRole] = useState("")
@@ -663,7 +655,7 @@ function MemberList({ users, isInvitation }) {
         )}
       </Modal>
       <Stack gap="0">
-        <Group w="100%" wrap="no-wrap">
+        <Group w="100%" wrap="nowrap">
           <SearchBar
             query={searchValue}
             setQuery={setSearchValue}
@@ -765,7 +757,7 @@ function MemberList({ users, isInvitation }) {
     </>
   )
 }
-function MemberListCard() {
+function MemberListCard({ activeTab, setActiveTab }) {
   const { org } = useOrg()
 
   const invitedUsers = org?.users.filter(
@@ -776,7 +768,7 @@ function MemberListCard() {
   )
 
   return (
-    <Tabs defaultValue="members">
+    <Tabs value={activeTab} onChange={setActiveTab}>
       <Tabs.List>
         <Tabs.Tab value="members">Team Members</Tabs.Tab>
 
@@ -802,6 +794,8 @@ export default function Team() {
     ? org.license.samlEnabled
     : org.samlEnabled
 
+  const [activeTab, setActiveTab] = useState<string>("members")
+
   return (
     <Container className="unblockable">
       <NextSeo title="Team" />
@@ -819,8 +813,10 @@ export default function Team() {
           />
         </Group>
 
-        {hasAccess(user.role, "teamMembers", "create") && <InviteMemberCard />}
-        <MemberListCard />
+        {hasAccess(user.role, "teamMembers", "create") && (
+          <InviteMemberCard showPendingInvitations={() => setActiveTab("invitations")} />
+        )}
+        <MemberListCard activeTab={activeTab} setActiveTab={setActiveTab} />
         {["admin", "owner"].includes(user.role) && <SAMLConfig />}
       </Stack>
     </Container>
