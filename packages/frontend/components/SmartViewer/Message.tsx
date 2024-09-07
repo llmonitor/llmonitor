@@ -219,7 +219,7 @@ function TextMessage({
   const text = data.content || data.text;
 
   return (
-    <Code className={classes.textMessage}>
+    <Code className={classes.textMessage} p="0">
       <ProtectedText>
         {editable ? (
           <Textarea
@@ -507,7 +507,7 @@ export function ChatMessage({
     <Paper
       className={`${classes.paper} ${compact ? classes.compact : ""}`}
       bg={`var(--mantine-color-${color}-${
-        scheme === "light" ? 2 : color === "gray" ? 7 : 9
+        scheme === "light" ? 1 : color === "gray" ? 7 : 9
       })`}
       {...props}
     >

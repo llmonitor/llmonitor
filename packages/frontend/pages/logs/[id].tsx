@@ -19,29 +19,29 @@ export default function PublicRun() {
   );
 
   return (
-    <Container size="sm">
-      <Stack gap="xl">
-        <Group justify="space-between">
-          <Logo />
-          {isSignedIn ? (
-            <Button component={Link} href="/">
-              Dashboard
-            </Button>
-          ) : (
-            <Text>The developer toolkit for LLM apps.</Text>
-          )}
-        </Group>
-        {isLoading && <Loader />}
-        {error && <Text>Could not get this log, it might not be public.</Text>}
-        {data && (
-          <RunInputOutput
-            initialRun={data}
-            withFeedback={true}
-            withPlayground={false}
-            withShare={false}
-          />
+    // <Container size="sm">
+    <Stack gap="xl">
+      <Group justify="space-between">
+        <Logo />
+        {isSignedIn ? (
+          <Button component={Link} href="/">
+            Dashboard
+          </Button>
+        ) : (
+          <Text>The developer toolkit for LLM apps.</Text>
         )}
-      </Stack>
-    </Container>
+      </Group>
+      {isLoading && <Loader />}
+      {error && <Text>Could not get this log, it might not be public.</Text>}
+      {data && (
+        <RunInputOutput
+          initialRun={data}
+          withFeedback={true}
+          withPlayground={false}
+          withShare={false}
+        />
+      )}
+    </Stack>
+    // </Container>
   );
 }

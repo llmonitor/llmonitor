@@ -109,6 +109,7 @@ export default function SmartViewer({
       />
     );
   } else if (data && data === "__NOT_INGESTED__") {
+    console.log(2);
     Message = (
       <Code color="var(--mantine-color-gray-light)">
         <Flex align="center">
@@ -148,6 +149,7 @@ export default function SmartViewer({
   return (
     <pre
       className={`${classes.pre} ${compact ? classes.compact : ""}`}
+      style={{ maxHeight: "300px" }}
       id="HERE"
     >
       {error && Message}

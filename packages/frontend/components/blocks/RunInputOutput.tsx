@@ -7,9 +7,12 @@ import {
   HoverCard,
   ScrollArea,
   Select,
+  SimpleGrid,
   Stack,
   Switch,
   Text,
+  Title,
+  useComputedColorScheme,
 } from "@mantine/core";
 import { notifications, showNotification } from "@mantine/notifications";
 import {
@@ -156,6 +159,7 @@ export default function RunInputOutput({
   withShare = false,
   mutateLogs,
 }) {
+  const colorScheme = useComputedColorScheme();
   const { user } = useUser();
   const { org } = useOrg();
   const { run, update, updateFeedback } = useRun(initialRun?.id, initialRun);
@@ -184,7 +188,11 @@ export default function RunInputOutput({
 
   return (
     <ErrorBoundary>
-      <Stack>
+      <Stack
+        style={{
+          backgroundColor: colorScheme === "light" ? "#fcfcfc" : "inherit",
+        }}
+      >
         {run?.type === "llm" && (
           <>
             {withShare && (
@@ -378,48 +386,62 @@ export default function RunInputOutput({
           </Group>
         )}
 
-        <Group justify="space-between">
-          <Text fw="bold" size="sm">
-            Input
-          </Text>
-          {run?.tokens?.prompt && <TokensBadge tokens={run.tokens?.prompt} />}
-        </Group>
-
-        <SmartViewer data={run?.input} />
-
-        {(run?.output || run?.error) && (
-          <>
-            <Group mt="lg" justify="space-between">
-              <Text fw="bold" size="sm">
-                {run.error
-                  ? "Error"
-                  : run.type === "retriever"
-                    ? "Documents"
-                    : "Output"}
-              </Text>
-
-              <Group>
-                {withFeedback && (
-                  <Feedbacks
-                    feedback={run.feedback}
-                    updateFeedback={async (feedback) => {
-                      try {
-                        await updateFeedback(feedback);
-                        await mutateLogs();
-                      } catch (error) {
-                        console.error(error);
-                      }
-                    }}
-                  />
-                )}
-                {run.tokens?.completion && (
-                  <TokensBadge tokens={run.tokens?.completion} />
-                )}
-              </Group>
+        <SimpleGrid cols={2} spacing="50px">
+          <Stack>
+            {/* <Card withBorder mt="lg"> */}
+            <Group justify="space-between" mb="md">
+              <Title order={3} fw="bold" size="h3">
+                Input
+              </Title>
+              {run?.tokens?.prompt && (
+                <TokensBadge tokens={run.tokens?.prompt} />
+              )}
             </Group>
-            <SmartViewer data={run.output} error={run.error} />
-          </>
-        )}
+
+            <SmartViewer data={run?.input} />
+          </Stack>
+
+          {(run?.output || run?.error) && (
+            <Stack>
+              <Group justify="space-between" mb="md">
+                <Title fw="bold" size="h3">
+                  {run.error
+                    ? "Error"
+                    : run.type === "retriever"
+                      ? "Documents"
+                      : "Output"}
+                </Title>
+
+                <Group>
+                  {withFeedback && (
+                    <Feedbacks
+                      feedback={run.feedback}
+                      updateFeedback={async (feedback) => {
+                        try {
+                          await updateFeedback(feedback);
+                          await mutateLogs();
+                        } catch (error) {
+                          console.error(error);
+                        }
+                      }}
+                    />
+                  )}
+                  {run.tokens?.completion && (
+                    <TokensBadge tokens={run.tokens?.completion} />
+                  )}
+                </Group>
+              </Group>
+              <Group mb="md">
+                <Badge variant="light">Score 1</Badge>
+                <Badge variant="light">Score 2</Badge>
+                <Badge variant="light">Score 3</Badge>
+                <Badge variant="light">Score 4</Badge>
+              </Group>
+              <SmartViewer data={run.output} error={run.error} />
+            </Stack>
+          )}
+        </SimpleGrid>
+        {/* </Card> */}
       </Stack>
     </ErrorBoundary>
   );
