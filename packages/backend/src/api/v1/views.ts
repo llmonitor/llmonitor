@@ -16,6 +16,8 @@ const ViewSchema = z.object({
   columns: z.any(),
   icon: z.string().optional(),
   type: z.enum(["llm", "thread", "trace"]),
+  sortfield: z.string().optional(),
+  sortdirection: z.string().optional(),
 });
 
 views.get("/", checkAccess("logs", "list"), async (ctx: Context) => {
@@ -40,7 +42,7 @@ views.post("/", async (ctx: Context) => {
   const { projectId, userId } = ctx.state;
 
   const validatedData = ViewSchema.parse(ctx.request.body);
-  const { name, data, columns, icon, type } = validatedData;
+  const { name, data, columns, icon, type, sortfield, sortdirection } = validatedData;
 
   const [insertedCheck] = await sql`
     insert into view ${sql({
@@ -51,6 +53,8 @@ views.post("/", async (ctx: Context) => {
       columns,
       icon,
       type,
+      sortfield,
+      sortdirection
     })}
     returning *
   `;
@@ -62,11 +66,11 @@ views.patch("/:id", async (ctx: Context) => {
   const { id } = ctx.params;
 
   const validatedData = ViewSchema.partial().parse(ctx.request.body);
-  const { name, data, columns, icon } = validatedData;
+  const { name, data, columns, icon, sortfield, sortdirection } = validatedData;
 
   const [updatedView] = await sql`
     update view
-    set ${sql(clearUndefined({ name, data, updatedAt: new Date(), columns, icon }))}
+    set ${sql(clearUndefined({ name, data, updatedAt: new Date(), columns, icon, sortfield, sortdirection }))}
     where project_id = ${projectId}
     and id = ${id}
     returning *

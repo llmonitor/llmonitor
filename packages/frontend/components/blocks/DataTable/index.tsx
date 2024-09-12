@@ -161,7 +161,11 @@ export default function DataTable({
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHeader key={header.id} header={header} />
+                    <TableHeader
+                      key={header.id}
+                      header={header}
+                      onHeaderClicked={onHeaderClicked}
+                    />
                   ))}
                 </tr>
               ))}

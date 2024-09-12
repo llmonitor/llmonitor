@@ -208,7 +208,7 @@ export default function Logs() {
     clearOnDefault: true,
   });
 
-  const { sortParams } = useSortParams();
+  const { sortField, sortDirection, sortParams } = useSortParams();
 
   const {
     view,
@@ -235,6 +235,22 @@ export default function Logs() {
   } = useProjectInfiniteSWR(`/runs?${serializedChecks}${sortParams}`);
 
   const { run: selectedRun, loading: runLoading } = useRun(selectedRunId);
+
+  useEffect(() => {
+    if (view) {
+      if (view.sortfield !== sortField || view.sortdirection !== sortDirection) {
+        setColumnsTouched(true);
+      } else {
+        setColumnsTouched(false);
+      }
+    } else {
+      if (sortField !== "createdAt" || sortDirection !== "desc") {
+        setColumnsTouched(true);
+      } else {
+        setColumnsTouched(false);
+      }
+    }
+  }, [sortField, sortDirection, view])
 
   useEffect(() => {
     if (!hasAccess(user?.role, "settings", "read")) {
@@ -329,10 +345,9 @@ export default function Logs() {
 
       const newView = await insertView({
         name: "New View",
-        type,
-        data: checks,
+        type, icon, data: checks,
         columns: visibleColumns,
-        icon,
+        sortField, sortDirection
       });
 
       setViewId(newView.id);
@@ -340,6 +355,7 @@ export default function Logs() {
       await updateView({
         data: checks,
         columns: visibleColumns,
+        sortField, sortDirection
       });
 
       notifications.show({
